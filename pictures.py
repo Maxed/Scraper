@@ -73,7 +73,7 @@ def check_if_album(url, file_name):
         imgur_album_id = match.group(4) # id of the imgur album
         i = 0 # counter for file names
         n = 0 # counter for new files
-        full_path = CURRENT_PATH + "/" + file_name + "/"
+        full_path = CURRENT_PATH + "/pictures/" + file_name + "/"
         if not os.path.isdir(full_path):
             os.mkdir(full_path)
             print("creating /" + path + "/ in " + CURRENT_PATH)
