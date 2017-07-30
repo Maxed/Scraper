@@ -68,28 +68,28 @@ def download_files():
 def check_if_album(url, file_name):
 	# check if the url is an imgur album or gallery
 	if "imgur.com/a/" in url or "imgur.com/gallery/" in url:
-		print("submission is an album")
 		# checks if the url is actually an album? idk i copied it from the internet
 		match = re.match("(https?)\:\/\/(www\.)?(?:m\.)?imgur\.com/(a|gallery)/([a-zA-Z0-9]+)(#[0-9]+)?", url)
 		imgur_album_id = match.group(4) # id of the imgur album
+		print( "submission is an album containing " + str(len(imgur.get_album_images(imgur_album_id))) + " images")
 		i = 0 # counter for file names
 		n = 0 # counter for new files
-		if not os.path.isdir(CURRENT_PATH + "/pictures/"):
-			os.mkdir(CURRENT_PATH + "/pictures/")
-		full_path = CURRENT_PATH + "/pictures/" + file_name + "/"
-		print(os.path.isdir(full_path))
-		if not os.path.isdir(full_path):
-			os.mkdir(full_path)
-			print("creating /" + file_name + "/ in " + CURRENT_PATH + "/pictures/")
-		for image in imgur.get_album_images(imgur_album_id):
-			i += 1
-			# append a number if the image is part of an album
-			f = file_name + "_" + str(i)
-			f = get_file_name(image.link, f)
-			if not os.path.isfile(full_path + f):
-				n += 1
-				add_to_queue(image.link, full_path + f)
-		print("album contained " + str(n) + " new images")
+		if len(imgur.get_album_images(imgur_album_id)) == 1:
+			add_to_queue(image.link, file_name)
+		else:
+			full_path = CURRENT_PATH + "/pictures/" + file_name + "/"
+			if not os.path.isdir(full_path):
+				os.mkdir(full_path)
+				print("creating /" + file_name + "/ in " + CURRENT_PATH + "/pictures/")
+			for image in imgur.get_album_images(imgur_album_id):
+				i += 1
+				# append a number if the image is part of an album
+				f = file_name + "_" + str(i)
+				f = get_file_name(image.link, f)
+				if not os.path.isfile(full_path + f):
+					n += 1
+					add_to_queue(image.link, full_path + f)
+			print("album contained " + str(n) + " new images")
 		return True
 	else:
 		return False
@@ -99,7 +99,7 @@ def check_submission(url, file_name):
 	if url.endswith(img):
 		f = CURRENT_PATH + "/pictures/" + get_file_name(url, file_name)
 		if not os.path.isfile(f):
-			add_to_queue(url, "/pictures/" + get_file_name(url, file_name))
+			add_to_queue(url, f)
 			print(url + " added to the download_queue")
 	else:
 		check_if_album(url, file_name)
@@ -124,6 +124,10 @@ def get_submissions():
 		time.sleep(1)
 
 	print(str(c) + " new submissions found")
+
+if not os.path.isdir(CURRENT_PATH + "/pictures/"):
+	os.mkdir(CURRENT_PATH + "/pictures/")
+	print("creating /pictures/ in " + CURRENT_PATH)
 
 get_submissions()
 download_files()
