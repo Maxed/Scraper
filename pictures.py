@@ -12,7 +12,7 @@ import config
 #TODO fix for reddit images redd.it/###.jpg
 
 # max number of submissions to check
-LIMIT = 50
+LIMIT = 5
 
 # subreddit being checked
 #TODO allow for multireddits
@@ -43,21 +43,25 @@ imgur = ImgurClient(
 def get_file_name(url, file_name):
 	# get the extension from the url and append it to the file name
 	f = file_name + '.' + url.split('.')[-1]
+	f = CURRENT_PATH + "/pictures/" + f
 	return f # string
 
 # add the url to download_queue and file name to file_name_queue
-def add_to_queue(url, name):
+def add_to_queue(url, file_name):
 	download_queue.append(url)
-	file_name_queue.append(name)
+	file_name_queue.append(file_name)
+	print("added " + url + " to the download queue as " + file_name)
+	print("the download queue contains " + str(len(download_queue )) + " items")
 
 # download files from the queue then clear the queue
 def download_files():
 	q = 0
+	print("downloading " + str(len(download_queue )) + " items")
 	while q < len(download_queue):
 		# download the file
 		print(str(len(download_queue) - q) + " downloads left in queue")
 		urllib.request.urlretrieve(download_queue[q], file_name_queue[q])
-		print("downloading " + download_queue[q])
+		print("downloading " + download_queue[q] + " as " + file_name_queue[q])
 		q += 1
 		time.sleep(1)
 	print(str(len(download_queue)) + " images have been downloaded")
@@ -71,24 +75,26 @@ def check_if_album(url, file_name):
 		# checks if the url is actually an album? idk i copied it from the internet
 		match = re.match("(https?)\:\/\/(www\.)?(?:m\.)?imgur\.com/(a|gallery)/([a-zA-Z0-9]+)(#[0-9]+)?", url)
 		imgur_album_id = match.group(4) # id of the imgur album
-		print( "submission is an album containing " + str(len(imgur.get_album_images(imgur_album_id))) + " images")
+		print(url + " is an album containing " + str(len(imgur.get_album_images(imgur_album_id))) + " images")
 		i = 0 # counter for file names
 		n = 0 # counter for new files
 		if len(imgur.get_album_images(imgur_album_id)) == 1:
-			add_to_queue(image.link, file_name)
+			for image in imgur.get_album_images(imgur_album_id):
+				if not os.path.isfile(get_file_name(image.link, file_name)):
+					add_to_queue(image.link, get_file_name(image.link, file_name))
 		else:
-			full_path = CURRENT_PATH + "/pictures/" + file_name + "/"
-			if not os.path.isdir(full_path):
-				os.mkdir(full_path)
+			album_dir = CURRENT_PATH + "/pictures/" + file_name
+			if not os.path.isdir(album_dir):
+				os.mkdir(album_dir)
 				print("creating /" + file_name + "/ in " + CURRENT_PATH + "/pictures/")
 			for image in imgur.get_album_images(imgur_album_id):
 				i += 1
 				# append a number if the image is part of an album
-				f = file_name + "_" + str(i)
+				f = "/" + file_name + "/" + file_name + "_" + str(i)
 				f = get_file_name(image.link, f)
-				if not os.path.isfile(full_path + f):
+				if not os.path.isfile(f):
 					n += 1
-					add_to_queue(image.link, full_path + f)
+					add_to_queue(image.link, f)
 			print("album contained " + str(n) + " new images")
 		return True
 	else:
@@ -97,7 +103,7 @@ def check_if_album(url, file_name):
 # checks if the url is an image or is an imgur album
 def check_submission(url, file_name):
 	if url.endswith(img):
-		f = CURRENT_PATH + "/pictures/" + get_file_name(url, file_name)
+		f = get_file_name(url, file_name)
 		if not os.path.isfile(f):
 			add_to_queue(url, f)
 			print(url + " added to the download_queue")
@@ -120,7 +126,7 @@ def get_submissions():
 			c += 1
 		else:
 			print(id + " has already been checked")
-		print("sleeping for 1 seconds...")
+		print("sleeping for 1 second...")
 		time.sleep(1)
 
 	print(str(c) + " new submissions found")
