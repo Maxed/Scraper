@@ -43,7 +43,7 @@ imgur = ImgurClient(
 def get_file_name(url, file_name):
 	# get the extension from the url and append it to the file name
 	f = file_name + '.' + url.split('.')[-1]
-	f = CURRENT_PATH + "/pictures/" + f
+	f = CURRENT_PATH + "/pictures/" + "/" + config.subreddit + "/" + f
 	return f # string
 
 # add the url to download_queue and file name to file_name_queue
@@ -83,10 +83,10 @@ def check_if_album(url, file_name):
 				if not os.path.isfile(get_file_name(image.link, file_name)):
 					add_to_queue(image.link, get_file_name(image.link, file_name))
 		else:
-			album_dir = CURRENT_PATH + "/pictures/" + file_name
+			album_dir = CURRENT_PATH + "/pictures/" + config.subreddit + "/" + file_name
 			if not os.path.isdir(album_dir):
 				os.mkdir(album_dir)
-				print("creating /" + file_name + "/ in " + CURRENT_PATH + "/pictures/")
+				print("creating /" + file_name + "/ in " + album_dir)
 			for image in imgur.get_album_images(imgur_album_id):
 				i += 1
 				# append a number if the image is part of an album
@@ -134,6 +134,10 @@ def get_submissions():
 if not os.path.isdir(CURRENT_PATH + "/pictures/"):
 	os.mkdir(CURRENT_PATH + "/pictures/")
 	print("creating /pictures/ in " + CURRENT_PATH)
+
+if not os.path.isdir(CURRENT_PATH + "/pictures/" + config.subreddit + "/"):
+	os.mkdir(CURRENT_PATH + "/pictures/" + config.subreddit + "/")
+	print("creating /"  + config.subreddit + "/ in " + CURRENT_PATH)
 
 get_submissions()
 download_files()
