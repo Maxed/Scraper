@@ -12,7 +12,7 @@ import config
 #TODO fix for reddit images redd.it/###.jpg
 
 # max number of submissions to check
-LIMIT = 5
+LIMIT = 200
 
 # subreddit being checked
 #TODO allow for multireddits
@@ -50,8 +50,7 @@ def get_file_name(url, file_name):
 def add_to_queue(url, file_name):
 	download_queue.append(url)
 	file_name_queue.append(file_name)
-	print("added " + url + " to the download queue as " + file_name)
-	print("the download queue contains " + str(len(download_queue )) + " items")
+	print(url + " added to the download queue " + "(" + str(len(download_queue )) + " items)")
 
 # download files from the queue then clear the queue
 def download_files():
@@ -65,7 +64,7 @@ def download_files():
 		q += 1
 		time.sleep(1)
 	print(str(len(download_queue)) + " images have been downloaded")
-		# clear download_queue and file_name_queue
+	# clear download_queue and file_name_queue
 	download_queue[:] = []
 	file_name_queue[:] = []
 
@@ -106,7 +105,6 @@ def check_submission(url, file_name):
 		f = get_file_name(url, file_name)
 		if not os.path.isfile(f):
 			add_to_queue(url, f)
-			print(url + " added to the download_queue")
 	else:
 		check_if_album(url, file_name)
 
